@@ -8,19 +8,20 @@ while getopts "u:d:" opt; do
   case ${opt} in
     u ) ALT_USER=$OPTARG ;; 
     d ) DAYS_OFFSET=$OPTARG ;;
-    * ) echo "Usage: $0 [-u alternative_user] [-d days_offset]"; exit 1 ;;
+    * ) echo "Usage: $0 [-u alternative_user] [-d days_offset]"; return 1 ;;
   esac
 done
 
 # Get ALT USERNAME
 if [[ -n "$ALT_USER" ]]; then
   USER_NAME=$ALT_USER
+  echo "Specifed Username $ALT_USER"
+
 fi
 
 # day offsets can only be negative
 if [[ "$DAYS_OFFSET" -gt 0 ]]; then
   DAYS_OFFSET=$(( -DAYS_OFFSET ))
-  echo "Warning: Converting positive offset to negative: $DAYS_OFFSET"
 fi
 
 # MACOS DATE COMMAND IS DIFFERENT 
@@ -41,7 +42,7 @@ fi
 
 if [[ $? -ne 0 ]]; then
   echo "Invalid date offset: $DAYS_OFFSET"
-  exit 1
+  return 1
 fi
 
 TARGET_DIR="$BASE_PATH/$USER_NAME/$TARGET_DATE"
@@ -52,18 +53,18 @@ if [[ "$USER_NAME" == "$(whoami)" && "$DAYS_OFFSET" -eq 0 ]]; then
   if [[ ! -d "$TARGET_DIR" ]]; then
     mkdir -p "$TARGET_DIR"
     if [[ $? -eq 0 ]]; then
-      chmod 777 "$TARGET_DIR"
+      chmod 755 "$TARGET_DIR"
       echo "Created directory: $TARGET_DIR"
     else
       echo "Failed to create directory: $TARGET_DIR"
-      exit 1
+      return 1
     fi
   fi
 fi
 
 
 if [[ -d "$TARGET_DIR" ]]; then
-  cd "$TARGET_DIR" || { echo "Cannot access directory: $TARGET_DIR"; exit 1; }
+  cd "$TARGET_DIR" || { echo "Cannot access directory: $TARGET_DIR"; return 1; }
   echo -e "\e[33m---------- $(pwd) ----------\e[0m"
 else
   echo "Directory does not exist: $TARGET_DIR"
@@ -72,5 +73,5 @@ else
   elif [[ "$DAYS_OFFSET" -ne 0 ]]; then
     echo "Cannot create directory with a date offset: $DAYS_OFFSET"
   fi
-  exit 1
+  return 1
 fi
