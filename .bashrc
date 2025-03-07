@@ -14,3 +14,6 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias rm='rm -iv'
 alias mkdir='mkdir -p'
+
+
+alias rmssh='ssh-keygen -R'
